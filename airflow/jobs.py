@@ -631,6 +631,8 @@ class SchedulerJob(BaseJob):
                     logging.error("Tachycardia!")
             except Exception as deep_e:
                 logging.exception(deep_e)
+            finally:
+                settings.Session.remove()
         executor.end()
 
     def heartbeat_callback(self):
