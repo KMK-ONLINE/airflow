@@ -41,7 +41,7 @@ async = [
     'gevent>=0.13'
 ]
 celery = [
-    'celery>=3.1.17',
+    'celery==3.1.24',
     'flower>=0.7.3'
 ]
 crypto = ['cryptography>=0.9.3']
