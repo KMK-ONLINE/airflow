@@ -56,6 +56,8 @@ class DataprocClusterCreateOperator(BaseOperator):
                  region='global',
                  google_cloud_conn_id='google_cloud_default',
                  delegate_to=None,
+                 network_uri='',
+                 subnetwork_uri='',
                  *args,
                  **kwargs):
         """
@@ -126,6 +128,8 @@ class DataprocClusterCreateOperator(BaseOperator):
         self.labels = labels
         self.zone = zone
         self.region = region
+        self.network_uri = network_uri
+        self.subnetwork_uri = subnetwork_uri
 
     def _get_cluster_list_for_project(self, service):
         result = service.projects().regions().clusters().list(
@@ -248,6 +252,8 @@ class DataprocClusterCreateOperator(BaseOperator):
                 {'executableFile': uri} for uri in self.init_actions_uris
             ]
             cluster_data['config']['initializationActions'] = init_actions_dict
+        cluster_data['config']['gceClusterConfig']['networkUri'] = network_uri
+        cluster_data['config']['gceClusterConfig']['subnetworkUri'] = subnetwork_uri
 
         try:
             service.projects().regions().clusters().create(
