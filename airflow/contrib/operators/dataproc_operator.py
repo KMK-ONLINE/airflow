@@ -252,8 +252,8 @@ class DataprocClusterCreateOperator(BaseOperator):
                 {'executableFile': uri} for uri in self.init_actions_uris
             ]
             cluster_data['config']['initializationActions'] = init_actions_dict
-        cluster_data['config']['gceClusterConfig']['networkUri'] = network_uri
-        cluster_data['config']['gceClusterConfig']['subnetworkUri'] = subnetwork_uri
+        cluster_data['config']['gceClusterConfig']['networkUri'] = self.network_uri
+        cluster_data['config']['gceClusterConfig']['subnetworkUri'] = self.subnetwork_uri
 
         try:
             service.projects().regions().clusters().create(
