@@ -58,6 +58,8 @@ class DataprocClusterCreateOperator(BaseOperator):
                  delegate_to=None,
                  network_uri='',
                  subnetwork_uri='',
+                 service_account=None,
+                 service_account_scopes=None,
                  *args,
                  **kwargs):
         """
@@ -109,6 +111,10 @@ class DataprocClusterCreateOperator(BaseOperator):
             For this to work, the service account making the request must have domain-wide
             delegation enabled.
         :type delegate_to: string
+        :param service_account: The service account of the dataproc instances.
+        :type service_account: string
+        :param service_account_scopes: The URIs of service account scopes to be included.
+        :type service_account_scopes: list[string]
         """
         super(DataprocClusterCreateOperator, self).__init__(*args, **kwargs)
         self.google_cloud_conn_id = google_cloud_conn_id
@@ -130,6 +136,8 @@ class DataprocClusterCreateOperator(BaseOperator):
         self.region = region
         self.network_uri = network_uri
         self.subnetwork_uri = subnetwork_uri
+        self.service_account = service_account
+        self.service_account_scopes = service_account_scopes
 
     def _get_cluster_list_for_project(self, service):
         result = service.projects().regions().clusters().list(
@@ -254,6 +262,12 @@ class DataprocClusterCreateOperator(BaseOperator):
             cluster_data['config']['initializationActions'] = init_actions_dict
         cluster_data['config']['gceClusterConfig']['networkUri'] = self.network_uri
         cluster_data['config']['gceClusterConfig']['subnetworkUri'] = self.subnetwork_uri
+        if self.service_account:
+            cluster_data['config']['gceClusterConfig']['serviceAccount'] =\
+                self.service_account
+        if self.service_account_scopes:
+            cluster_data['config']['gceClusterConfig']['serviceAccountScopes'] =\
+                self.service_account_scopes
 
         try:
             service.projects().regions().clusters().create(
