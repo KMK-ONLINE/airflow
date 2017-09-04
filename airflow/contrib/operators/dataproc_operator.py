@@ -60,6 +60,7 @@ class DataprocClusterCreateOperator(BaseOperator):
                  subnetwork_uri='',
                  service_account=None,
                  service_account_scopes=None,
+                 image_version=None,
                  *args,
                  **kwargs):
         """
@@ -138,6 +139,7 @@ class DataprocClusterCreateOperator(BaseOperator):
         self.subnetwork_uri = subnetwork_uri
         self.service_account = service_account
         self.service_account_scopes = service_account_scopes
+        self.image_version = image_version
 
     def _get_cluster_list_for_project(self, service):
         result = service.projects().regions().clusters().list(
@@ -268,6 +270,8 @@ class DataprocClusterCreateOperator(BaseOperator):
         if self.service_account_scopes:
             cluster_data['config']['gceClusterConfig']['serviceAccountScopes'] =\
                 self.service_account_scopes
+        if self.image_version:
+            cluster_data['config']['softwareConfig']['imageVersion'] = self.image_version
 
         try:
             service.projects().regions().clusters().create(
