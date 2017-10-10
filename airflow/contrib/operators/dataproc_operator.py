@@ -58,6 +58,7 @@ class DataprocClusterCreateOperator(BaseOperator):
                  delegate_to=None,
                  network_uri='',
                  subnetwork_uri='',
+                 tags=[],
                  service_account=None,
                  service_account_scopes=None,
                  image_version=None,
@@ -112,6 +113,12 @@ class DataprocClusterCreateOperator(BaseOperator):
             For this to work, the service account making the request must have domain-wide
             delegation enabled.
         :type delegate_to: string
+        :param network_uri: Network uri for the dataproc instances
+        :type network_uri: string
+        :param subnetwork_uri: Subnetwork uri for dataproc instances
+        :type subnetwork_uri: string
+        :param tags: Network tags for the dataproc instances
+        :type tags: list[string]
         :param service_account: The service account of the dataproc instances.
         :type service_account: string
         :param service_account_scopes: The URIs of service account scopes to be included.
@@ -137,6 +144,7 @@ class DataprocClusterCreateOperator(BaseOperator):
         self.region = region
         self.network_uri = network_uri
         self.subnetwork_uri = subnetwork_uri
+        self.tags = tags
         self.service_account = service_account
         self.service_account_scopes = service_account_scopes
         self.image_version = image_version
@@ -264,6 +272,7 @@ class DataprocClusterCreateOperator(BaseOperator):
             cluster_data['config']['initializationActions'] = init_actions_dict
         cluster_data['config']['gceClusterConfig']['networkUri'] = self.network_uri
         cluster_data['config']['gceClusterConfig']['subnetworkUri'] = self.subnetwork_uri
+        cluster_data['config']['gceClusterConfig']['tags'] = self.tags
         if self.service_account:
             cluster_data['config']['gceClusterConfig']['serviceAccount'] =\
                 self.service_account
