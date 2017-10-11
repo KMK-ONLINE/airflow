@@ -59,6 +59,7 @@ class DataprocClusterCreateOperator(BaseOperator):
                  network_uri='',
                  subnetwork_uri='',
                  tags=[],
+                 internal_ip_only=True,
                  service_account=None,
                  service_account_scopes=None,
                  image_version=None,
@@ -119,6 +120,8 @@ class DataprocClusterCreateOperator(BaseOperator):
         :type subnetwork_uri: string
         :param tags: Network tags for the dataproc instances
         :type tags: list[string]
+        :param internal_ip_only: Dataproc instances only using internal ip, default is True
+        :type internal_ip_only: boolean
         :param service_account: The service account of the dataproc instances.
         :type service_account: string
         :param service_account_scopes: The URIs of service account scopes to be included.
@@ -145,6 +148,7 @@ class DataprocClusterCreateOperator(BaseOperator):
         self.network_uri = network_uri
         self.subnetwork_uri = subnetwork_uri
         self.tags = tags
+        self.internal_ip_only = internal_ip_only
         self.service_account = service_account
         self.service_account_scopes = service_account_scopes
         self.image_version = image_version
@@ -273,6 +277,7 @@ class DataprocClusterCreateOperator(BaseOperator):
         cluster_data['config']['gceClusterConfig']['networkUri'] = self.network_uri
         cluster_data['config']['gceClusterConfig']['subnetworkUri'] = self.subnetwork_uri
         cluster_data['config']['gceClusterConfig']['tags'] = self.tags
+        cluster_data['config']['gceClusterConfig']['internalIpOnly'] = self.internal_ip_only
         if self.service_account:
             cluster_data['config']['gceClusterConfig']['serviceAccount'] =\
                 self.service_account
