@@ -26,16 +26,71 @@ class DataprocClusterCreateOperator(BaseOperator):
     """
     Create a new cluster on Google Cloud Dataproc. The operator will wait until the
     creation is successful or an error occurs in the creation process.
-
     The parameters allow to configure the cluster. Please refer to
-
     https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters
-
     for a detailed explanation on the different parameters. Most of the configuration
     parameters detailed in the link are available as a parameter to this operator.
+    :param cluster_name: The name of the DataProc cluster to create.
+    :type cluster_name: string
+    :param project_id: The ID of the google cloud project in which
+        to create the cluster
+    :type project_id: string
+    :param num_workers: The # of workers to spin up
+    :type num_workers: int
+    :param storage_bucket: The storage bucket to use, setting to None lets dataproc
+        generate a custom one for you
+    :type storage_bucket: string
+    :param init_actions_uris: List of GCS uri's containing
+        dataproc initialization scripts
+    :type init_actions_uris: list[string]
+    :param metadata: dict of key-value google compute engine metadata entries
+        to add to all instances
+    :type metadata: dict
+    :param image_version: the version of software inside the Dataproc cluster
+    :type image_version: string
+    :param properties: dict of properties to set on
+        config files (e.g. spark-defaults.conf), see
+        https://cloud.google.com/dataproc/docs/reference/rest/v1/ \
+        projects.regions.clusters#SoftwareConfig
+    :type properties: dict
+    :param master_machine_type: Compute engine machine type to use for the master node
+    :type master_machine_type: string
+    :param master_disk_size: Disk size for the master node
+    :type int
+    :param worker_machine_type:Compute engine machine type to use for the worker nodes
+    :type worker_machine_type: string
+    :param worker_disk_size: Disk size for the worker nodes
+    :type worker_disk_size: int
+    :param num_preemptible_workers: The # of preemptible worker nodes to spin up
+    :type num_preemptible_workers: int
+    :param labels: dict of labels to add to the cluster
+    :type labels: dict
+    :param zone: The zone where the cluster will be located
+    :type zone: string
+    :param network_uri: The network uri to be used for machine communication, cannot be
+        specified with subnetwork_uri
+    :type network_uri: string
+    :param subnetwork_uri: The subnetwork uri to be used for machine communication,
+        cannot be specified with network_uri
+    :type subnetwork_uri: string
+    :param tags: The GCE tags to add to all instances
+    :type tags: list[string]
+    :param region: leave as 'global', might become relevant in the future
+    :param gcp_conn_id: The connection ID to use connecting to Google Cloud Platform.
+    :type gcp_conn_id: string
+    :param delegate_to: The account to impersonate, if any.
+        For this to work, the service account making the request must have domain-wide
+        delegation enabled.
+    :type delegate_to: string
+    :param service_account: The service account of the dataproc instances.
+    :type service_account: string
+    :param service_account_scopes: The URIs of service account scopes to be included.
+    :type service_account_scopes: list[string]
+    :param internal_ip_only: Dataproc instances only using internal ip, default is True
+    :type internal_ip_only: boolean
     """
 
-    template_fields = ['cluster_name',]
+    template_fields = ['cluster_name']
 
     @apply_defaults
     def __init__(self,
@@ -43,6 +98,9 @@ class DataprocClusterCreateOperator(BaseOperator):
                  project_id,
                  num_workers,
                  zone,
+                 network_uri=None,
+                 subnetwork_uri=None,
+                 tags=None,
                  storage_bucket=None,
                  init_actions_uris=None,
                  metadata=None,
@@ -59,64 +117,10 @@ class DataprocClusterCreateOperator(BaseOperator):
                  delegate_to=None,
                  service_account=None,
                  service_account_scopes=None,
+                 internal_ip_only=True,
                  *args,
                  **kwargs):
-        """
-        Create a new DataprocClusterCreateOperator.
 
-        For more info on the creation of a cluster through the API, have a look at:
-
-        https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters
-
-        :param cluster_name: The name of the DataProc cluster to create.
-        :type cluster_name: string
-        :param project_id: The ID of the google cloud project in which
-            to create the cluster
-        :type project_id: string
-        :param num_workers: The # of workers to spin up
-        :type num_workers: int
-        :param storage_bucket: The storage bucket to use, setting to None lets dataproc
-            generate a custom one for you
-        :type storage_bucket: string
-        :param init_actions_uris: List of GCS uri's containing
-            dataproc initialization scripts
-        :type init_actions_uris: list[string]
-        :param metadata: dict of key-value google compute engine metadata entries
-            to add to all instances
-        :type metadata: dict
-        :param image_version: the version of software inside the Dataproc cluster
-        :type image_version: string
-        :param properties: dict of properties to set on
-            config files (e.g. spark-defaults.conf), see
-            https://cloud.google.com/dataproc/docs/reference/rest/v1/ \
-            projects.regions.clusters#SoftwareConfig
-        :type properties: dict
-        :param master_machine_type: Compute engine machine type to use for the master node
-        :type master_machine_type: string
-        :param master_disk_size: Disk size for the master node
-        :type int
-        :param worker_machine_type:Compute engine machine type to use for the worker nodes
-        :type worker_machine_type: string
-        :param worker_disk_size: Disk size for the worker nodes
-        :type worker_disk_size: int
-        :param num_preemptible_workers: The # of preemptible worker nodes to spin up
-        :type num_preemptible_workers: int
-        :param labels: dict of labels to add to the cluster
-        :type labels: dict
-        :param zone: The zone where the cluster will be located
-        :type zone: string
-        :param region: leave as 'global', might become relevant in the future
-        :param gcp_conn_id: The connection ID to use connecting to Google Cloud Platform.
-        :type gcp_conn_id: string
-        :param delegate_to: The account to impersonate, if any.
-            For this to work, the service account making the request must have domain-wide
-            delegation enabled.
-        :type delegate_to: string
-        :param service_account: The service account of the dataproc instances.
-        :type service_account: string
-        :param service_account_scopes: The URIs of service account scopes to be included.
-        :type service_account_scopes: list[string]
-        """
         super(DataprocClusterCreateOperator, self).__init__(*args, **kwargs)
         self.gcp_conn_id = gcp_conn_id
         self.delegate_to = delegate_to
@@ -135,8 +139,12 @@ class DataprocClusterCreateOperator(BaseOperator):
         self.worker_disk_size = worker_disk_size
         self.labels = labels
         self.zone = zone
+        self.network_uri = network_uri
+        self.subnetwork_uri = subnetwork_uri
+        self.tags = tags
         self.region = region
         self.service_account = service_account
+        self.internal_ip_only = internal_ip_only
         self.service_account_scopes = service_account_scopes
 
     def _get_cluster_list_for_project(self, service):
@@ -241,11 +249,17 @@ class DataprocClusterCreateOperator(BaseOperator):
         # [a-z]([-a-z0-9]*[a-z0-9])? (current airflow version string follows
         # semantic versioning spec: x.y.z).
         cluster_data['labels'].update({'airflow-version':
-                                       'v' + version.replace('.', '-')})
+                                       'v' + version.replace('.', '-').replace('+','-')})
         if self.storage_bucket:
             cluster_data['config']['configBucket'] = self.storage_bucket
         if self.metadata:
             cluster_data['config']['gceClusterConfig']['metadata'] = self.metadata
+        if self.network_uri:
+            cluster_data['config']['gceClusterConfig']['networkUri'] = self.network_uri
+        if self.subnetwork_uri:
+            cluster_data['config']['gceClusterConfig']['subnetworkUri'] = self.subnetwork_uri
+        if self.tags:
+            cluster_data['config']['gceClusterConfig']['tags'] = self.tags
         if self.image_version:
             cluster_data['config']['softwareConfig']['imageVersion'] = self.image_version
         if self.properties:
@@ -261,6 +275,7 @@ class DataprocClusterCreateOperator(BaseOperator):
         if self.service_account_scopes:
             cluster_data['config']['gceClusterConfig']['serviceAccountScopes'] =\
                     self.service_account_scopes
+        cluster_data['config']['gceClusterConfig']['internalIpOnly'] = self.internal_ip_only
         return cluster_data
 
     def execute(self, context):

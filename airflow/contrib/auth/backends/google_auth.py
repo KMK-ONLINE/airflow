@@ -123,8 +123,13 @@ class GoogleAuthBackend(object):
 
     def domain_check(self, email):
         domain = email.split('@')[1]
-        if domain == get_config_param('domain'):
+        domain_config = get_config_param('domain')
+        allowed_domains = domain_config.split(',')
+        allowed_domains = [allowed_domain.strip() for allowed_domain in allowed_domains]
+
+        if domain in allowed_domains:
             return True
+
         return False
 
     def load_user(self, userid):
